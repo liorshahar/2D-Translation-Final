@@ -1,0 +1,75 @@
+<!-- Created by Lior Shahar and Hanan Avraham -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>2D Transformation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="css/style.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="js/script.js"></script>
+  </head>
+  <body>
+    <header>
+      <nav><h1>Welcome to 2D Transformer</h1></nav>
+    </header>
+    <main>
+      <!-- right canvas context -->
+      <article id="mainContext">
+        <canvas id="myCanvas"></canvas>
+      </article>
+
+      <!-- left menu -->
+
+      <article id="leftMenuBar">
+        <section>
+          <p>TOOLS</p>
+        </section>
+
+        <ul class="toolsContainer">
+          <li id="reflectYbuttin" class="toolsItem"></li>
+          <li id="reflectXbuttin" class="toolsItem"></li>
+          <li id="zoomInButton" class="toolsItem"></li>
+          <li id="zoomOutButton" class="toolsItem"></li>
+          <li id="rotatRightButton" class="toolsItem"></li>
+          <li class="toolsItem">
+            <div class="quantity">
+              <input
+                id="rotatAngleInput"
+                type="number"
+                min="0"
+                max="360"
+                step="1"
+                value="0"
+              />
+            </div>
+          </li>
+          <li id="shearXButton" class="toolsItem"></li>
+
+          <li id="moveButton" class="toolsItem"></li>
+          <li class="toolsItemLong">
+            <input
+              id="loadFileInput"
+              type="file"
+              name="file"
+              class="inputfile"
+            />
+            <label for="loadFileInput" id="loadFileLable"
+              ><div></div>
+              <span>Choose a file...</span></label
+            >
+            <button id="draw">Draw</button>
+          </li>
+        </ul>
+      </article>
+    </main>
+    <footer></footer>
+  </body>
+</html>

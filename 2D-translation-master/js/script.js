@@ -521,29 +521,32 @@ window.onload = () => {
   let scaleOut = parseFloat(1 / scaleIn);
 
   /*  Set input file lisener*/
-  let loadFileInput = document.getElementById("loadFileInput");
-  loadFileInput.addEventListener("change", e => {
-    fileName = e.target.files[0].name;
-    if (fileName) {
-      document.getElementById("loadFileLable").children[1].innerHTML = fileName;
-    }
-  });
+
+  function onChange(event) {
+    var reader = new FileReader();
+    fileName = event.target.files[0].name;
+    document.getElementById("loadFileLable").children[1].innerHTML = fileName;
+    reader.onload = onReaderLoad;
+    reader.readAsText(event.target.files[0]);
+  }
+
+  function onReaderLoad(event) {
+    var obj = JSON.parse(event.target.result);
+    localStorage.setItem("points", JSON.stringify(obj));
+  }
+
+  document.getElementById("loadFileInput").addEventListener("change", onChange);
 
   /* Set draw button lisener */
+
   let drawButton = document.getElementById("draw");
   drawButton.addEventListener("click", () => {
-    clearCanvas(ctx);
     if (!fileName) {
-      alert("Please load file");
+      alert("Please Load File...");
     } else {
-      fetch(`http://${splitUrl[2]}/2D-translation-master/${fileName}`)
-        .then(response => response.json())
-        .then(data => {
-          /* Drawing the picture from the text file */
-          localStorage.setItem("points", JSON.stringify(data));
-          drawObject(ctx);
-          isDraw = true;
-        });
+      clearCanvas(ctx);
+      drawObject(ctx);
+      isDraw = true;
     }
   });
 

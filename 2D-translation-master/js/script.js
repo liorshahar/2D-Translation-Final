@@ -121,6 +121,7 @@ function drawObject(ctx) {
 /* Calaculation function */
 
 function myMove(tx, ty) {
+  console.log("dxy" + tx, ty);
   if (localStorage.points) {
     pointsArray = JSON.parse(localStorage.points);
     if (pointsArray.lines) {
@@ -157,6 +158,7 @@ function myMove(tx, ty) {
 }
 
 function myScaling(s) {
+  console.log("S-> " + s);
   let dx, dy;
   if (localStorage.points) {
     pointsArray = JSON.parse(localStorage.points);
@@ -199,15 +201,16 @@ function myScaling(s) {
     dx = -Math.abs(pointsArray.lines[0].x - pointsArray.lines[0].x / 1.1);
     dy = -Math.abs(pointsArray.lines[0].y - pointsArray.lines[0].y / 1.1);
     console.log(dx, dy);
+    myMove(dx, dy);
   } else if (arguments[1] == "zoomOut") {
     dx = Math.abs(pointsArray.lines[0].x - pointsArray.lines[0].x * 1.1);
     dy = Math.abs(pointsArray.lines[0].y - pointsArray.lines[0].y * 1.1);
     console.log(dx, dy);
+    myMove(dx, dy);
   }
-  console.log(dx, dy);
-  myMove(dx, dy);
 }
 
+/* Calc the translation distans for given coord and angle*/
 function calaXY(x, y, teta) {
   let tx =
     x * Math.cos((teta * Math.PI) / 180) - y * Math.sin((teta * Math.PI) / 180);
@@ -408,7 +411,7 @@ function myShearX(shearX) {
   myMove(dx, dy);
 }
 
-function compare(coord_1, coord_2) {
+function compareY(coord_1, coord_2) {
   let comparison = 0;
   if (coord_1 && coord_2) {
     if (coord_1.y >= coord_2.y) {
@@ -419,25 +422,133 @@ function compare(coord_1, coord_2) {
     return comparison;
   }
 }
-function getMinPoints() {
-  let minPointsArray = [];
-  let lineMinCoord, circleMinCoord, curveMinCoord;
+
+function compareX(coord_1, coord_2) {
+  let comparison = 0;
+  if (coord_1 && coord_2) {
+    if (coord_1.x >= coord_2.x) {
+      comparison = 1;
+    } else {
+      comparison = -1;
+    }
+    return comparison;
+  }
+}
+
+function getMinPointsXY() {
+  let minPointsArrayY = [];
+  let minPointsArrayX = [];
+
+  let lineMinCoordX,
+    circleMinCoordX,
+    curveMinCoordX,
+    lineMinCoordY,
+    circleMinCoordY,
+    curveMinCoordY;
   if (localStorage.points) {
     pointsArray = JSON.parse(localStorage.points);
     if (pointsArray.lines) {
-      lineMinCoord = pointsArray.lines.sort(compare)[0];
-      minPointsArray.push(lineMinCoord);
+      lineMinCoordY = pointsArray.lines.sort(compareY)[0];
+      minPointsArrayY.push(lineMinCoordY);
+      lineMinCoordX = pointsArray.lines.sort(compareX)[0];
+      minPointsArrayX.push(lineMinCoordX);
     }
     if (pointsArray.circles) {
-      circleMinCoord = pointsArray.circles.sort(compare)[0];
-      minPointsArray.push(circleMinCoord);
+      circleMinCoordY = pointsArray.circles.sort(compareY)[0];
+      minPointsArrayY.push(circleMinCoordY);
+      circleMinCoordX = pointsArray.circles.sort(compareX)[0];
+      minPointsArrayX.push(circleMinCoordX);
     }
     if (pointsArray.curves) {
-      curveMinCoord = pointsArray.curves.sort(compare)[0];
-      minPointsArray.push(curveMinCoord);
+      curveMinCoordY = pointsArray.curves.sort(compareY)[0];
+      minPointsArrayY.push(curveMinCoordY);
+      curveMinCoordX = pointsArray.curves.sort(compareX)[0];
+      minPointsArrayX.push(curveMinCoordX);
     }
-    return minPointsArray.sort(compare)[0];
+
+    return {
+      x: minPointsArrayX.sort(compareX)[0].x,
+      y: minPointsArrayY.sort(compareY)[0].y
+    };
   }
+}
+
+function getMaxPointsXY() {
+  let maxPointsArrayY = [];
+  let maxPointsArrayX = [];
+
+  let linemaxCoordX,
+    circlemaxCoordX,
+    curvemaxCoordX,
+    linemaxCoordY,
+    circlemaxCoordY,
+    curvemaxCoordY;
+  if (localStorage.points) {
+    pointsArray = JSON.parse(localStorage.points);
+    if (pointsArray.lines) {
+      linemaxCoordY = pointsArray.lines.sort(compareY)[
+        pointsArray.lines.length - 1
+      ];
+      maxPointsArrayY.push(linemaxCoordY);
+      linemaxCoordX = pointsArray.lines.sort(compareX)[
+        pointsArray.lines.length - 1
+      ];
+      maxPointsArrayX.push(linemaxCoordX);
+    }
+    if (pointsArray.circles) {
+      circlemaxCoordY = pointsArray.circles.sort(compareY)[
+        pointsArray.circles.length - 1
+      ];
+      maxPointsArrayY.push(circlemaxCoordY);
+      circlemaxCoordX = pointsArray.circles.sort(compareX)[
+        pointsArray.circles.length - 1
+      ];
+      maxPointsArrayX.push(circlemaxCoordX);
+    }
+    if (pointsArray.curves) {
+      curvemaxCoordY = pointsArray.curves.sort(compareY)[
+        pointsArray.curves.length - 1
+      ];
+      maxPointsArrayY.push(curvemaxCoordY);
+      curvemaxCoordX = pointsArray.curves.sort(compareX)[
+        pointsArray.curves.length - 1
+      ];
+      maxPointsArrayX.push(curvemaxCoordX);
+    }
+
+    return {
+      x: maxPointsArrayX.sort(compareX)[maxPointsArrayX.length - 1].x,
+      y: maxPointsArrayY.sort(compareY)[maxPointsArrayY.length - 1].y
+    };
+  }
+}
+
+function fitToScreen(ctx) {
+  let minXY = getMinPointsXY();
+  let maxXY;
+  let dx = minXY.x - 0;
+  let dy = minXY.y - 0;
+  myMove(-dx, -dy);
+
+  maxXY = getMaxPointsXY();
+  console.log("maxXY: " + maxXY.x + " : " + maxXY.y);
+  console.log(
+    "maxXYDivis: " +
+      ctx.canvas.width / maxXY.x +
+      " : " +
+      ctx.canvas.height / maxXY.y
+  );
+  if (ctx.canvas.width / maxXY.x <= ctx.canvas.height / maxXY.y) {
+    let s = (ctx.canvas.width / maxXY.x) * 0.8;
+    console.log("s1 after scale: " + s);
+    myScaling(s);
+  } else {
+    let s = (ctx.canvas.height / maxXY.y) * 0.8;
+    console.log("s2 after scale: " + s);
+    myScaling(s);
+  }
+  console.log("after fit");
+  myMove(ctx.canvas.width * 0.1, ctx.canvas.height * 0.1);
 }
 
 function initAngleInput() {
@@ -525,8 +636,11 @@ window.onload = () => {
     if (!fileName) {
       alert("Please Load File...");
     } else {
+      fitToScreen(ctx);
+      console.log(localStorage.points);
       clearCanvas(ctx);
       drawObject(ctx);
+      minPoints = getMinPointsXY();
       isDraw = true;
     }
   });
@@ -537,7 +651,9 @@ window.onload = () => {
       pointsArray = JSON.parse(localStorage.refreshPoints);
       localStorage.setItem("points", JSON.stringify(pointsArray));
       clearCanvas(ctx);
+      fitToScreen(ctx);
       drawObject(ctx);
+      minPoints = getMinPointsXY();
     } else {
       alert("Load file Please...");
     }
@@ -560,12 +676,14 @@ window.onload = () => {
   zoomInButton.addEventListener("click", () => {
     myScaling(scaleIn, "zoomIn");
     drawObject(ctx);
+    minPoints = getMinPointsXY();
   });
 
   let zoomOutButton = document.getElementById("zoomOutButton");
   zoomOutButton.addEventListener("click", () => {
     myScaling(scaleOut, "zoomOut");
     drawObject(ctx);
+    minPoints = getMinPointsXY();
   });
 
   /* ---------------------------------------------------------- */
@@ -578,6 +696,7 @@ window.onload = () => {
     if (localStorage.points) {
       myRotation(inputAngle.value);
       drawObject(ctx);
+      minPoints = getMinPointsXY();
     }
   });
 
@@ -588,6 +707,7 @@ window.onload = () => {
     if (localStorage.points) {
       myReflectX();
       drawObject(ctx);
+      minPoints = getMinPointsXY();
     }
   });
 
@@ -604,16 +724,15 @@ window.onload = () => {
   /* Set Shear X listener */
   let minPoints;
 
-  let shearFacotr = parseFloat(1.1);
-  let shearReFacotr = -parseFloat(1.1);
+  let shearFacotr = parseFloat(0.2);
+  let shearReFacotr = -parseFloat(shearFacotr);
 
   let shearXButton = document.getElementById("shearXButton");
   shearXButton.addEventListener("click", () => {
     if (isDraw) {
       shearXButton.style.backgroundColor = "darkgrey";
       shearButtonFlag = true;
-
-      console.log(minPoints);
+      minPoints = getMinPointsXY();
     } else {
       alert("Load file Please...");
     }
@@ -644,6 +763,7 @@ window.onload = () => {
         if (localStorage.points) {
           myMove(tx, ty);
           drawObject(ctx);
+          minPoints = getMinPointsXY();
           movePoints = [];
           movePointsIndex = 0;
           moveButton.style.backgroundColor = "rgb(114, 111, 111)";
@@ -673,6 +793,7 @@ window.onload = () => {
         drawObject(ctx);
       }
       event.preventDefault();
+      minPoints = getMinPointsXY();
     },
     false
   );
@@ -682,7 +803,7 @@ window.onload = () => {
     if (shearButtonFlag) {
       event.preventDefault();
       event.stopPropagation();
-      minPoints = getMinPoints();
+
       mouseCoord = relMouseCoords(ctx.canvas, event);
       if (
         mouseCoord.y >= minPoints.y - 10 &&
@@ -693,12 +814,11 @@ window.onload = () => {
         if (mouseClickedOnShear == true) {
           console.log("move");
           console.log("oldX--: " + oldX);
-          if (event.pageX > oldX + 2) {
+          if (event.pageX > oldX + 1) {
             console.log("right: " + event.pageX);
-            myShearX(shearFacotr);
-          } else if (event.pageX < oldX - 2) {
             myShearX(shearReFacotr);
-
+          } else if (event.pageX < oldX - 1) {
+            myShearX(shearFacotr);
             console.log("left: " + event.pageX);
           }
           oldX = event.pageX;
@@ -713,7 +833,7 @@ window.onload = () => {
 
   canvas.onmousedown = event => {
     console.log("----------mouseDown--------");
-    minPoints = getMinPoints();
+    minPoints = getMinPointsXY();
     mouseCoord = relMouseCoords(ctx.canvas, event);
     if (shearButtonFlag) {
       if (

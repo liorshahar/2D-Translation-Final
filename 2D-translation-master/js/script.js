@@ -384,23 +384,23 @@ function myShearX(shearX) {
     if (pointsArray.lines) {
       for (let i = 0; i < pointsArray.lines.length; i++) {
         if (pointsArray.lines[i].line == 0) {
-          pointsArray.lines[i].x += shearX * pointsArray.lines[i].y;
+          pointsArray.lines[i].x -= shearX * pointsArray.lines[i].y;
         } else {
-          pointsArray.lines[i].x += shearX * pointsArray.lines[i].y;
+          pointsArray.lines[i].x -= shearX * pointsArray.lines[i].y;
         }
       }
     }
     if (pointsArray.circles) {
       for (let i = 0; i < pointsArray.circles.length; i++) {
-        pointsArray.circles[i].x += shearX * pointsArray.circles[i].y;
+        pointsArray.circles[i].x -= shearX * pointsArray.circles[i].y;
       }
     }
     if (pointsArray.curves) {
       for (let i = 0; i < pointsArray.curves.length; i++) {
-        pointsArray.curves[i].startX += shearX * pointsArray.curves[i].startY;
-        pointsArray.curves[i].cp1x += shearX * pointsArray.curves[i].cp1y;
-        pointsArray.curves[i].cp2x += shearX * pointsArray.curves[i].cp2y;
-        pointsArray.curves[i].x += shearX * pointsArray.curves[i].y;
+        pointsArray.curves[i].startX -= shearX * pointsArray.curves[i].startY;
+        pointsArray.curves[i].cp1x -= shearX * pointsArray.curves[i].cp1y;
+        pointsArray.curves[i].cp2x -= shearX * pointsArray.curves[i].cp2y;
+        pointsArray.curves[i].x -= shearX * pointsArray.curves[i].y;
       }
     }
   }
@@ -408,53 +408,36 @@ function myShearX(shearX) {
   myMove(dx, dy);
 }
 
-function myShearY() {
-  let dx = pointsArray.lines[0].x - 0;
-  let dy = pointsArray.lines[0].y - 0;
-  myMove(-dx, -dy);
-
+function compare(coord_1, coord_2) {
+  let comparison = 0;
+  if (coord_1 && coord_2) {
+    if (coord_1.y >= coord_2.y) {
+      comparison = 1;
+    } else {
+      comparison = -1;
+    }
+    return comparison;
+  }
+}
+function getMinPoints() {
+  let minPointsArray = [];
+  let lineMinCoord, circleMinCoord, curveMinCoord;
   if (localStorage.points) {
     pointsArray = JSON.parse(localStorage.points);
     if (pointsArray.lines) {
-      for (let i = 0; i < pointsArray.lines.length; i++) {
-        if (pointsArray.lines[i].line == 0) {
-          if (pointsArray.lines[i].x != 0) {
-            pointsArray.lines[i].x = -pointsArray.lines[i].x;
-          }
-        } else {
-          if (pointsArray.lines[i].x != 0) {
-            pointsArray.lines[i].x = -pointsArray.lines[i].x;
-          }
-        }
-      }
+      lineMinCoord = pointsArray.lines.sort(compare)[0];
+      minPointsArray.push(lineMinCoord);
     }
     if (pointsArray.circles) {
-      for (let i = 0; i < pointsArray.circles.length; i++) {
-        if (pointsArray.circles[i].x != 0) {
-          pointsArray.circles[i].x = -pointsArray.circles[i].x;
-        }
-      }
+      circleMinCoord = pointsArray.circles.sort(compare)[0];
+      minPointsArray.push(circleMinCoord);
     }
     if (pointsArray.curves) {
-      for (let i = 0; i < pointsArray.curves.length; i++) {
-        if (pointsArray.curves[i].startX != 0) {
-          pointsArray.curves[i].startX = -pointsArray.curves[i].startX;
-        }
-        if (pointsArray.curves[i].cp1x != 0) {
-          pointsArray.curves[i].cp1x = -pointsArray.curves[i].cp1x;
-        }
-        if (pointsArray.curves[i].cp2x != 0) {
-          pointsArray.curves[i].cp2x = -pointsArray.curves[i].cp2x;
-        }
-        if (pointsArray.curves[i].x != 0) {
-          pointsArray.curves[i].x = -pointsArray.curves[i].x;
-        }
-      }
+      curveMinCoord = pointsArray.curves.sort(compare)[0];
+      minPointsArray.push(curveMinCoord);
     }
+    return minPointsArray.sort(compare)[0];
   }
-  localStorage.setItem("points", JSON.stringify(pointsArray));
-  myMove(pointsArray.lines[0].x - 0, pointsArray.lines[0].y - 0);
-  myMove(dx, dy);
 }
 
 function initAngleInput() {
@@ -503,10 +486,6 @@ window.onload = () => {
   setLeftMenuAndCanvasHight();
   initAngleInput();
 
-  /* Get url info */
-  let url = window.location.href;
-  let splitUrl = url.split("/");
-
   /* Canvas */
   let canvas = document.getElementById("myCanvas");
   let ctx = canvas.getContext("2d");
@@ -514,6 +493,7 @@ window.onload = () => {
   /* Global scope variables */
   let fileName;
   let moveButtonFlag = false;
+  let shearButtonFlag = false;
   let isDraw = false;
 
   /* Scaling variable */
@@ -533,6 +513,7 @@ window.onload = () => {
   function onReaderLoad(event) {
     var obj = JSON.parse(event.target.result);
     localStorage.setItem("points", JSON.stringify(obj));
+    localStorage.setItem("refreshPoints", JSON.stringify(obj));
   }
 
   document.getElementById("loadFileInput").addEventListener("change", onChange);
@@ -550,10 +531,21 @@ window.onload = () => {
     }
   });
 
+  let refreshButton = document.getElementById("refreshButton");
+  refreshButton.addEventListener("click", () => {
+    if (isDraw) {
+      pointsArray = JSON.parse(localStorage.refreshPoints);
+      localStorage.setItem("points", JSON.stringify(pointsArray));
+      clearCanvas(ctx);
+      drawObject(ctx);
+    } else {
+      alert("Load file Please...");
+    }
+  });
+
   /* Set moveButton listner */
   let moveButton = document.getElementById("moveButton");
   moveButton.addEventListener("click", () => {
-    console.log(isDraw);
     if (isDraw) {
       moveButton.style.backgroundColor = "darkgrey";
       moveButtonFlag = true;
@@ -610,14 +602,20 @@ window.onload = () => {
   });
 
   /* Set Shear X listener */
+  let minPoints;
 
-  let shearFacotr = 1.1;
+  let shearFacotr = parseFloat(1.1);
+  let shearReFacotr = -parseFloat(1.1);
+
   let shearXButton = document.getElementById("shearXButton");
   shearXButton.addEventListener("click", () => {
-    if (localStorage.points) {
-      myShearX(shearFacotr);
-      myReflectY();
-      drawObject(ctx);
+    if (isDraw) {
+      shearXButton.style.backgroundColor = "darkgrey";
+      shearButtonFlag = true;
+
+      console.log(minPoints);
+    } else {
+      alert("Load file Please...");
     }
   });
 
@@ -627,6 +625,10 @@ window.onload = () => {
   let movePoints = [];
   let movePointsIndex = 0;
 
+  /* Shear variable */
+  let shearClickPoint;
+  let mouseClickedOnShear = false;
+  let oldX;
   /* main */
   canvas.onclick = event => {
     /* Translate object logic */
@@ -649,7 +651,12 @@ window.onload = () => {
       }
     }
 
-    /* Translate object logic */
+    if (shearButtonFlag) {
+      shearClickPoint = relMouseCoords(ctx.canvas, event);
+      console.log(shearClickPoint);
+      shearButtonFlag = false;
+      shearXButton.style.backgroundColor = "rgb(114, 111, 111)";
+    }
   };
 
   /* Canvas listener */
@@ -668,4 +675,62 @@ window.onload = () => {
     },
     false
   );
+
+  canvas.onmousemove = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    minPoints = getMinPoints();
+    let mouseCoord;
+    if (shearButtonFlag) {
+      mouseCoord = relMouseCoords(ctx.canvas, event);
+      if (
+        mouseCoord.y >= minPoints.y - 10 &&
+        mouseCoord.y <= minPoints.y + 10
+      ) {
+        canvas.style.cursor = "pointer";
+
+        if (mouseClickedOnShear == true) {
+          console.log("move");
+          console.log("oldX--: " + oldX);
+          if (event.pageX > oldX + 2) {
+            console.log("right: " + event.pageX);
+            myShearX(shearFacotr);
+          } else if (event.pageX < oldX - 2) {
+            myShearX(shearReFacotr);
+
+            console.log("left: " + event.pageX);
+          }
+          oldX = event.pageX;
+
+          drawObject(ctx);
+        }
+      } else {
+        canvas.style.cursor = "default";
+      }
+    }
+  };
+
+  canvas.onmousedown = event => {
+    minPoints = getMinPoints();
+    mouseCoord = relMouseCoords(ctx.canvas, event);
+    if (shearButtonFlag) {
+      if (
+        mouseCoord.y >= minPoints.y - 10 &&
+        mouseCoord.y <= minPoints.y + 10
+      ) {
+        console.log("down");
+        mouseClickedOnShear = true;
+        oldX = event.pageX;
+        console.log("oldX onClick: " + oldX);
+      }
+    }
+  };
+
+  canvas.onmouseup = event => {
+    if (mouseClickedOnShear == true) {
+      console.log("up");
+      mouseClickedOnShear = false;
+      canvas.style.cursor = "default";
+    }
+  };
 };

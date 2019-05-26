@@ -22,7 +22,7 @@ nav h1 {
 /* right page side -> canvas context */
 
 #mainContext {
-  background-color: gray;
+  background-color: white;
   width: 88%;
   height: 100%;
   float: right;
@@ -72,7 +72,7 @@ nav h1 {
   width: 35%;
   height: 80px;
   padding: 10px;
-  margin-top: 1px;
+  margin-top: 3px;
   margin-left: 10px;
   margin-bottom: 1px;
   cursor: pointer;
@@ -147,6 +147,15 @@ input[id="rotatAngleInput"] {
 
 .toolsItem:hover {
   background-color: darkgrey;
+  cursor: pointer;
+}
+#draw:hover {
+  background-color: darkgrey;
+  cursor: pointer;
+}
+#refreshButton:hover {
+  background-color: darkgrey;
+  cursor: pointer;
 }
 
 .toolsItem:nth-child(1) {
@@ -197,8 +206,8 @@ input[id="rotatAngleInput"] {
 
 .toolsItemLong {
   background-color: rgb(114, 111, 111);
-  width: 81.5%;
-  height: 80px;
+  width: 80%;
+  height: 120px;
   padding: 10px;
   margin-top: 2px;
   margin-left: 10px;
@@ -260,6 +269,21 @@ input[id="rotatAngleInput"] {
 
 /* draw button */
 #draw {
+  border: none;
+  color: white;
+  height: 32px;
+  line-height: 24px;
+  width: 191px;
+  background-color: black;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-size: 1.1em;
+  font-weight: 400;
+  border-radius: 4px;
+}
+
+/* refresh button */
+#refreshButton {
   border: none;
   color: white;
   height: 32px;

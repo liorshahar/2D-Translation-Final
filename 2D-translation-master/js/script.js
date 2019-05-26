@@ -631,8 +631,9 @@ window.onload = () => {
   let oldX;
   /* main */
   canvas.onclick = event => {
+    console.log("----------mouseClick--------");
     /* Translate object logic */
-    if (moveButtonFlag) {
+    if (moveButtonFlag == true) {
       movePoints[movePointsIndex] = relMouseCoords(ctx.canvas, event);
       movePointsIndex++;
 
@@ -651,7 +652,7 @@ window.onload = () => {
       }
     }
 
-    if (shearButtonFlag) {
+    if (shearButtonFlag == true) {
       shearClickPoint = relMouseCoords(ctx.canvas, event);
       console.log(shearClickPoint);
       shearButtonFlag = false;
@@ -677,11 +678,11 @@ window.onload = () => {
   );
 
   canvas.onmousemove = event => {
-    event.preventDefault();
-    event.stopPropagation();
-    minPoints = getMinPoints();
     let mouseCoord;
     if (shearButtonFlag) {
+      event.preventDefault();
+      event.stopPropagation();
+      minPoints = getMinPoints();
       mouseCoord = relMouseCoords(ctx.canvas, event);
       if (
         mouseCoord.y >= minPoints.y - 10 &&
@@ -711,6 +712,7 @@ window.onload = () => {
   };
 
   canvas.onmousedown = event => {
+    console.log("----------mouseDown--------");
     minPoints = getMinPoints();
     mouseCoord = relMouseCoords(ctx.canvas, event);
     if (shearButtonFlag) {
